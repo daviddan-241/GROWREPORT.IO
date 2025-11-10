@@ -1,85 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GrowReport SaaS</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
-body{background:linear-gradient(135deg,#6d28d9,#3b82f6);display:flex;justify-content:center;align-items:center;min-height:100vh;color:#333;}
-.container{background:#fff;border-radius:25px;padding:30px;width:100%;max-width:550px;box-shadow:0 15px 50px rgba(0,0,0,0.3);}
-h1,h2,h3{margin-bottom:10px;}
-h1{text-align:center;color:#4f46e5;}
-h2{color:#1e40af;}
-h3{color:#1e3a8a;}
-.lead{text-align:center;color:#555;margin-bottom:20px;}
-input{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:1px solid #ccc;font-size:1rem;}
-.btn{padding:12px 20px;margin:5px 0;cursor:pointer;border:none;border-radius:12px;background:#4f46e5;color:#fff;font-weight:bold;transition:0.3s;}
-.btn:hover{background:#4338ca;}
-.btn.copy{background:#10b981;}
-.btn.copy:hover{background:#059669;}
-.wallet{background:#f3f4f6;padding:15px;border-radius:12px;margin-bottom:10px;color:#111;transition:0.3s;}
-.wallet:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(0,0,0,0.2);}
-.wallet h3{margin-bottom:5px;}
-.wallet p{margin-bottom:5px;}
-.referral{text-align:center;margin-top:25px;}
-.txbox{margin-top:10px;}
-.verify-result{margin-top:10px;background:#e5e7eb;color:#111;padding:10px;border-radius:10px;}
-#proSection,#dashboard,#reportsSection{display:none;}
-.dash-card{background:#e0e7ff;padding:15px;border-radius:15px;margin-bottom:10px;color:#1e3a8a;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GrowReport.io</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { margin:0; font-family:'Inter',sans-serif; background:linear-gradient(to right,#6b21a8,#2563eb); display:flex; justify-content:center; align-items:center; min-height:100vh; }
+    .container { background:white; padding:2rem; border-radius:1.5rem; box-shadow:0 10px 30px rgba(0,0,0,0.2); max-width:400px; width:100%; }
+    h1 { text-align:center; margin-bottom:1rem; }
+    input { width:100%; padding:0.8rem; margin-bottom:1rem; border-radius:0.5rem; border:1px solid #ccc; }
+    button { width:100%; padding:0.8rem; border:none; border-radius:0.5rem; background:black; color:white; font-weight:bold; cursor:pointer; }
+    button:hover { background:#333; }
+    #proSection { display:none; margin-top:1rem; padding:1rem; background:#f3f3f3; border-radius:0.5rem; }
+    .referral { margin-top:1rem; font-size:0.9rem; }
+    .referral input { width:calc(100% - 90px); display:inline-block; }
+    .referral button { display:inline-block; width:80px; margin-left:5px; }
+    #verifyMessage { margin-top:0.5rem; font-weight:bold; }
+  </style>
 </head>
 <body>
-<div class="container">
-<h1>GrowReport SaaS</h1>
+  <div class="container">
+    <h1>GrowReport.io</h1>
+    <input id="pageUrl" placeholder="facebook.com/YourPage">
+    <input id="userEmail" placeholder="you@gmail.com" type="email">
+    <button id="sendReport">Send My FREE Report</button>
 
-<!-- Signup/Login -->
-<div id="authSection">
-<h2>Sign Up / Login</h2>
-<input type="email" id="authEmail" placeholder="Email">
-<input type="password" id="authPass" placeholder="Password">
-<button id="authBtn" class="btn">Sign Up / Login</button>
-</div>
+    <div class="referral">
+      <p>Share & earn $3:</p>
+      <input id="referralLink" readonly>
+      <button id="copyReferral">Copy</button>
+    </div>
 
-<!-- Free Reports -->
-<div id="reportsSection">
-<p class="lead">Free Growth Report — 3 uses only. Upgrade to Pro after that.</p>
-<input type="text" id="pageInput" placeholder="Enter your page/URL">
-<button id="getReportBtn" class="btn">Generate Report</button>
-<p id="usageInfo"></p>
-</div>
+    <div id="proSection"></div>
+  </div>
 
-<!-- Pro Section -->
-<div id="proSection">
-<h2>Pro Plan — $15 every 2 weeks</h2>
-<p>Pay crypto to continue generating unlimited reports.</p>
-<div id="wallets"></div>
-<div class="txbox">
-<input id="txInput" placeholder="Paste transaction hash (tx) here">
-<input id="buyerEmail" placeholder="Your email (optional)">
-<button id="verifyBtn" class="btn">Verify Payment</button>
-</div>
-<div id="verifyResult" class="verify-result"></div>
-</div>
-
-<!-- Pro Dashboard -->
-<div id="dashboard">
-<h2>Pro Dashboard</h2>
-<div class="dash-card">Unlimited reports: ✅</div>
-<div class="dash-card">Referral bonus: $<span id="refBonus">0</span></div>
-<div class="dash-card">Reports generated: <span id="reportsCount">0</span></div>
-</div>
-
-<!-- Referral -->
-<div class="referral">
-<h3>Referral Link</h3>
-<input id="refLink" readonly>
-<button id="copyRefBtn" class="btn copy">Copy</button>
-</div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
